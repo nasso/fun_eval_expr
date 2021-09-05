@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a3d70a168111d75022ca25380a9f5353181045fb46fdec580998ea08e10d70ad
+-- hash: c90bb1ab3b2dc0bd83988f376954126b765853ec413b3312173cbf68728c2f7a
 
 name:           funEvalExpr
 version:        0.1.0.0
@@ -33,6 +33,7 @@ library
       Paths_funEvalExpr
   hs-source-dirs:
       src
+  ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
   default-language: Haskell2010
@@ -43,7 +44,7 @@ executable funEvalExpr
       Paths_funEvalExpr
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , funEvalExpr
@@ -57,7 +58,7 @@ test-suite funEvalExpr-test
       Paths_funEvalExpr
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuickCheck
     , base >=4.7 && <5

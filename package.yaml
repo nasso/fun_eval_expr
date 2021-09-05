@@ -26,12 +26,15 @@ dependencies:
 
 library:
   source-dirs: src
+  ghc-options:
+    - -Wall
 
 executables:
   funEvalExpr:
     main: Main.hs
     source-dirs: app
     ghc-options:
+      - -Wall
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
@@ -43,6 +46,7 @@ tests:
     main: Spec.hs
     source-dirs: test
     ghc-options:
+      - -Wall
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
