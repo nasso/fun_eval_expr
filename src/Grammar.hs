@@ -18,28 +18,22 @@ data Expr
   deriving (Eq, Show)
 
 expr :: Parser Expr
-expr = do
-  lhs <- term
-  rhs <- optional (symbol "+" >> expr)
-  case rhs of
-    Nothing -> return lhs
-    Just r -> return $ Sum lhs r
+expr = term `chainl1` sumop
+
+sumop :: Parser (Expr -> Expr -> Expr)
+sumop = Sum <$ symbol "+" <|> Diff <$ symbol "-"
 
 term :: Parser Expr
-term = do
-  lhs <- factor
-  rhs <- optional (symbol "*" >> term)
-  case rhs of
-    Nothing -> return lhs
-    Just r -> return $ Prod lhs r
+term = factor `chainl1` prodop
+
+prodop :: Parser (Expr -> Expr -> Expr)
+prodop = Prod <$ symbol "*" <|> Quot <$ symbol "/"
 
 factor :: Parser Expr
-factor = do
-  lhs <- base
-  rhs <- optional (symbol "^" >> factor)
-  case rhs of
-    Nothing -> return lhs
-    Just r -> return $ Pow lhs r
+factor = base `chainr1` powop
+
+powop :: Parser (Expr -> Expr -> Expr)
+powop = Pow <$ symbol "^"
 
 base :: Parser Expr
 base = do

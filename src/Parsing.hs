@@ -4,7 +4,7 @@ module Parsing
   )
 where
 
-import Control.Applicative (Alternative (empty, (<|>)), many, optional, some)
+import Control.Applicative (Alternative (empty, (<|>)), many, optional, some, (<**>))
 import Data.Char (isAlpha, isAlphaNum, isDigit, isLower, isSpace, isUpper)
 
 -- | A parser from `String` to values of type `a`.
@@ -119,3 +119,21 @@ lexeme p = p <* many space
 -- | Parse exactly the given string, plus zero or more trailing whitespace.
 symbol :: String -> Parser String
 symbol = lexeme . literal
+
+-- | `chainl1 p op` Parse a chain of *one* or more occurrences of `p`,
+-- separated by `op`. Return a value obtained by a left associative application
+-- of all functions returned by `op` to the values returned by `p`.
+chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
+chainl1 p op = scan
+  where
+    scan = p <**> rst
+    rst = (\f y g x -> g (f x y)) <$> op <*> p <*> rst <|> pure id
+
+-- | `chainr1 p op` Parse a chain of one or more occurrences of `p`,
+-- separated by `op`. Return a value obtained by a right associative application
+-- of all functions returned by `op` to the values returned by `p`.
+chainr1 :: Parser a -> Parser (a -> a -> a) -> Parser a
+chainr1 p op = scan
+  where
+    scan = p <**> rst
+    rst = (flip <$> op <*> scan) <|> pure id
