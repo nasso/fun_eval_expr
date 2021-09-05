@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c90bb1ab3b2dc0bd83988f376954126b765853ec413b3312173cbf68728c2f7a
+-- hash: 9cc0180c2f448b5c68237e50c0193173c9fe5e410b20a9610b5f2ccf99450cd9
 
 name:           funEvalExpr
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Grammar
       Lib
       Parsing
   other-modules:
@@ -54,7 +55,7 @@ test-suite funEvalExpr-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      ParserSpec
+      GrammarSpec
       Paths_funEvalExpr
   hs-source-dirs:
       test

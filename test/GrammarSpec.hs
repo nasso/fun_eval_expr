@@ -1,9 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module ParserSpec where
+module GrammarSpec where
 
+import Grammar (number)
 import Numeric (showFFloatAlt)
-import Parsing (integer, natural, parse, real)
+import Parsing (parse)
 import Test.QuickCheck
   ( Args (maxSuccess),
     forAllProperties,
@@ -15,13 +16,13 @@ showReal :: Double -> String
 showReal x = showFFloatAlt Nothing x ""
 
 prop_parseNatural :: Word -> Bool
-prop_parseNatural x = parse natural (show x) == Just (x, "")
+prop_parseNatural x = parse number (show x) == Just (fromIntegral x, "")
 
 prop_parseInt :: Int -> Bool
-prop_parseInt x = parse integer (show x) == Just (x, "")
+prop_parseInt x = parse number (show x) == Just (fromIntegral x, "")
 
 prop_parseReal :: Double -> Bool
-prop_parseReal x = parse real (showReal x) == Just (x, "")
+prop_parseReal x = parse number (showReal x) == Just (x, "")
 
 --------------------------------------------------------------------------------
 

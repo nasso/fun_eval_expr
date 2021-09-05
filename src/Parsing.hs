@@ -6,8 +6,6 @@ where
 
 import Control.Applicative (Alternative (empty, (<|>)), many, optional, some)
 import Data.Char (isAlpha, isAlphaNum, isDigit, isLower, isSpace, isUpper)
-import Data.Maybe (fromMaybe)
-import Data.Word (Word8)
 
 -- | A parser from `String` to values of type `a`.
 newtype Parser a = Parser
@@ -113,26 +111,13 @@ char c = match (== c)
 literal :: String -> Parser String
 literal = foldr ((>>) . char) (return [])
 
--- | Parse a natural number (a non-negative integer).
-natural :: Parser Word
-natural = read <$> some digit
+-- | Make a parser consume any trailing whitespace.
+lexeme :: Parser a -> Parser a
+lexeme p = do
+  x <- p
+  _ <- many space
+  return x
 
--- | Parse an integer.
-integer :: Parser Int
-integer = do
-  s <- char '-' <|> char '+' <|> return '+'
-  n <- read <$> some digit
-  return $
-    if s == '-'
-      then - n
-      else n
-
--- | Parse a double-precision floating point number.
-real :: Parser Double
-real = do
-  s <- char '-' <|> char '+' <|> return '+'
-  n <- some digit
-  char '.'
-  d <- some digit
-  let num = read $ n ++ ('.' : d)
-   in return $ if s == '-' then - num else num
+-- | Parse exactly the given string, plus zero or more trailing whitespace.
+symbol :: String -> Parser String
+symbol = lexeme . literal
