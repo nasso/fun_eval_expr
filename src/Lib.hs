@@ -15,6 +15,7 @@ calc (Diff x y) = calc x - calc y
 calc (Prod x y) = calc x * calc y
 calc (Quot x y) = calc x / calc y
 calc (Pow x y) = calc x ** calc y
+calc (Neg x) = - calc x
 
 eval :: String -> Either ParseError Double
 eval s = case parse expr s of

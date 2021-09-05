@@ -1,10 +1,10 @@
 module Grammar
   ( Expr (..),
     expr,
-    number,
   )
 where
 
+import Control.Applicative
 import Parsing
 
 data Expr
@@ -14,6 +14,8 @@ data Expr
   | Prod Expr Expr
   | Quot Expr Expr
   | Pow Expr Expr
+  | Neg Expr
+  deriving (Eq, Show)
 
 expr :: Parser Expr
 expr = do
@@ -33,31 +35,40 @@ term = do
 
 factor :: Parser Expr
 factor = do
-  lhs <- pow
+  lhs <- base
   rhs <- optional (symbol "^" >> factor)
   case rhs of
     Nothing -> return lhs
     Just r -> return $ Pow lhs r
 
-pow :: Parser Expr
-pow =
-  ( do
-      _ <- symbol "("
-      e <- expr
-      _ <- symbol ")"
-      return e
-  )
-    <|> constant
+base :: Parser Expr
+base = do
+  sign <- optional (symbol "+" <|> symbol "-")
+  value <- (symbol "(" *> expr <* symbol ")") <|> constant
+  return $ if sign == Just "-" then Neg value else value
 
 constant :: Parser Expr
-constant = Const <$> lexeme number
+constant = Grammar.Const <$> lexeme number
 
--- | Parse a number.
 number :: Parser Double
 number = do
-  s <- char '-' <|> char '+' <|> return '+'
-  n <- some digit
-  _ <- char '.'
-  d <- some digit
-  let num = read $ n ++ ('.' : d)
-   in return $ if s == '-' then - num else num
+  n <- integer
+  d <- fraction <|> return 0.0
+  e <- tenExp <|> return 0
+  return $ (n + d) * 10 ^^ e
+
+integer :: Parser Double
+integer = read <$> some digit
+
+fraction :: Parser Double
+fraction =
+  do
+    d <- char '.' *> some digit
+    return $ read $ '0' : '.' : d
+
+tenExp :: Parser Int
+tenExp = do
+  _ <- char 'e' <|> char 'E'
+  s <- optional (symbol "+" <|> symbol "-")
+  n <- read <$> some digit
+  return $ if s == Just "-" then - n else n

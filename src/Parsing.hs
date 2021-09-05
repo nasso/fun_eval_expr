@@ -109,14 +109,12 @@ char c = match (== c)
 
 -- | Parse exactly the given string.
 literal :: String -> Parser String
-literal = foldr ((>>) . char) (return [])
+literal [] = return []
+literal (x : xs) = char x >> literal xs >> return (x : xs)
 
 -- | Make a parser consume any trailing whitespace.
 lexeme :: Parser a -> Parser a
-lexeme p = do
-  x <- p
-  _ <- many space
-  return x
+lexeme p = p <* many space
 
 -- | Parse exactly the given string, plus zero or more trailing whitespace.
 symbol :: String -> Parser String
