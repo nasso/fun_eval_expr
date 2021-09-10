@@ -1,4 +1,3 @@
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 import Grammar (Expr (..), expr)
@@ -28,6 +27,27 @@ instance Arbitrary NumberFormatter where
           [(showFFloatAlt, "showFFloatAlt"), (showEFloat, "showEFloat")]
     return $ NumberFormatter fn name
 
+eps :: Double
+eps = 0.00001
+
+floatEq :: Double -> Double -> Double -> Bool
+floatEq x y = (<) $ abs (x - y)
+
+exprEq :: Expr -> Expr -> Double -> Bool
+exprEq (Const x) (Const y) d = floatEq x y d
+exprEq (Sum x y) (Sum x' y') d = exprEq x x' d && exprEq y y' d
+exprEq (Diff x y) (Diff x' y') d = exprEq x x' d && exprEq y y' d
+exprEq (Prod x y) (Prod x' y') d = exprEq x x' d && exprEq y y' d
+exprEq (Quot x y) (Quot x' y') d = exprEq x x' d && exprEq y y' d
+exprEq (Pow x y) (Pow x' y') d = exprEq x x' d && exprEq y y' d
+exprEq (Neg x) (Neg x') d = exprEq x x' d
+exprEq _ _ _ = False
+
+sExprEq :: String -> Expr -> Double -> Bool
+sExprEq s e d = case parse expr s of
+  Just (ex, "") -> exprEq ex e d
+  _ -> False
+
 prop_parseNatural :: Word -> Bool
 prop_parseNatural x = parse expr (show x) == Just (Const $ fromIntegral x, "")
 
@@ -38,10 +58,8 @@ prop_parseInt x =
   parse expr (show x) == Just (Neg $ Const $ fromIntegral $ abs x, "")
 
 prop_parseReal :: NumberFormatter -> Double -> Bool
-prop_parseReal (NumberFormatter f _) x
-  | x >= 0 = parse expr (f x) == Just (Const x, "")
-prop_parseReal (NumberFormatter f _) x =
-  parse expr (f x) == Just (Neg $ Const $ abs x, "")
+prop_parseReal (NumberFormatter f _) x | x >= 0 = sExprEq (f x) (Const x) eps
+prop_parseReal (NumberFormatter f _) x = sExprEq (f x) (Neg $ Const $ abs x) eps
 
 --------------------------------------------------------------------------------
 
